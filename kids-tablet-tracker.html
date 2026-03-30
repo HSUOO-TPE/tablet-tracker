@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌟 平板時間管理</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+:root {
+  --freya: #ff6eb4;
+  --freya-bg: #fff0f7;
+  --freya-border: #ffd6ec;
+  --ryan: #4dabf7;
+  --ryan-bg: #f0f8ff;
+  --ryan-border: #bee3f8;
+  --bg: #f5f3ff;
+  --white: #ffffff;
+  --text: #2d2d3a;
+  --muted: #8a8aa0;
+  --green: #38d9a9;
+  --green-bg: #e6fcf5;
+  --red: #ff6b6b;
+  --red-bg: #fff5f5;
+  --orange: #ffa94d;
+  --admin: #845ef7;
+  --admin-bg: #f3f0ff;
+  --border: #e8e5f5;
+  --shadow-sm: 0 2px 8px rgba(100,80,200,0.08);
+  --shadow: 0 6px 24px rgba(100,80,200,0.12);
+  --shadow-lg: 0 12px 40px rgba(100,80,200,0.18);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(255,110,180,0.07) 0%, transparent 50%),
+    radial-gradient(circle at 85% 85%, rgba(77,171,247,0.07) 0%, transparent 50%);
+  min-height: 100vh;
+  color: var(--text);
+}
+
+.header {
+  background: var(--white);
+  border-bottom: 2px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.header-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--freya), var(--ryan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.header-right { display:flex; align-items:center; gap:10px; }
+.header-date { font-size: 12px; color: var(--muted); font-weight: 500; }
+.admin-btn {
+  background: var(--admin-bg);
+  color: var(--admin);
+  border: 1.5px solid #c5b8f8;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+.admin-btn:hover { background: var(--admin); color: white; }
+
+.tabs {
+  display: flex;
+  background: var(--white);
+  border-bottom: 2px solid var(--border);
+  padding: 0 20px;
+}
+.tab {
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all .2s;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+.tab.active { color: var(--admin); border-bottom-color: var(--admin); }
+.tab:hover:not(.active) { color: var(--text); }
+
+.main { padding: 18px; max-width: 860px; margin: 0 auto; }
+.section { display: none; }
+.section.active { display: block; }
+
+.week-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.week-nav { display: flex; align-items: center; gap: 10px; }
+.nav-btn {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  width: 32px; height: 32px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.nav-btn:hover { background: var(--admin); color: white; border-color: var(--admin); }
+.week-label { font-size: 15px; font-weight: 700; }
+
+.players-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+@media(max-width:600px){ .players-grid{ grid-template-columns:1fr; } }
+
+.player-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.player-card.freya { border-color: var(--freya-border); }
+.player-card.ryan { border-color: var(--ryan-border); }
+.player-header {
+  padding: 12px 16px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.player-card.freya .player-header { background: linear-gradient(135deg, var(--freya-bg), #ffe8f4); }
+.player-card.ryan .player-header { background: linear-gradient(135deg, var(--ryan-bg), #dbeeff); }
+.player-avatar {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.player-card.freya .player-avatar { background: var(--freya); }
+.player-card.ryan .player-avatar { background: var(--ryan); }
+.player-name { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 900; }
+.player-card.freya .player-name { color: #d44a8e; }
+.player-card.ryan .player-name { color: #1a7bbf; }
+.player-stats {
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.stat-box {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 7px 8px;
+  text-align: center;
+}
+.stat-num { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 900; line-height: 1; }
+.stat-num.green { color: var(--green); }
+.stat-num.red { color: var(--red); }
+.stat-num.blue { color: var(--ryan); }
+.stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; font-weight: 500; }
+
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.card-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.day-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.day-badge.task-day { background: #fff3cd; color: #856404; border: 1.5px solid #ffd700; }
+.day-badge.play-day { background: #d4edda; color: #155724; border: 1.5px solid #28a745; }
+.day-badge.sat { background: #cce5ff; color: #004085; border: 1.5px solid #007bff; }
+.day-badge.free { background: #f0f0f5; color: var(--muted); border: 1.5px solid var(--border); }
+
+.task-list { display: flex; flex-direction: column; gap: 7px; }
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  transition: all .2s;
+}
+.task-row.done { background: var(--green-bg); border-color: #9ee8d3; }
+.task-row.failed { background: var(--red-bg); border-color: #ffc9c9; }
+
+.task-check {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 900;
+  transition: all .2s;
+  background: white;
+  user-select: none;
+}
+.task-check.done { background: var(--green); border-color: var(--green); color: white; }
+.task-check.failed { background: var(--red); border-color: var(--red); color: white; }
+.task-name { flex: 1; font-size: 13px; font-weight: 500; }
+.task-penalty { font-size: 11px; color: var(--red); font-weight: 700; white-space: nowrap; }
+
+.quota-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-bottom: 6px;
+}
+.quota-label { font-size: 13px; font-weight: 500; flex: 1; }
+.quota-val { font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 900; }
+.quota-used { font-size: 11px; color: var(--muted); }
+
+.play-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.play-row label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.time-input {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 15px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  width: 75px;
+  background: white;
+  transition: border-color .2s;
+}
+.time-input:focus { outline: none; border-color: var(--admin); }
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: 'Noto Sans TC', sans-serif;
+  white-space: nowrap;
+}
+.btn-green { background: var(--green); color: white; }
+.btn-green:hover { background: #20c78d; }
+.btn-red { background: var(--red); color: white; }
+.btn-red:hover { background: #f43f3f; }
+.btn-admin { background: var(--admin); color: white; }
+.btn-admin:hover { background: #6741e0; }
+.btn-outline { background: none; border: 1.5px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: var(--admin); color: var(--admin); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-full { width: 100%; }
+.btn-danger { background: none; border: 1.5px solid var(--red); color: var(--red); }
+.btn-danger:hover { background: var(--red); color: white; }
+
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+.week-table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+.week-table th { background: var(--bg); padding: 9px 11px; text-align: left; font-weight: 700; color: var(--muted); font-size: 11px; border-bottom: 2px solid var(--border); }
+.week-table td { padding: 9px 11px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.week-table tr:last-child td { border-bottom: none; }
+.week-table tr:hover td { background: var(--bg); }
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.badge-green { background: var(--green-bg); color: #1a7a5a; }
+.badge-red { background: var(--red-bg); color: #c0392b; }
+.badge-blue { background: var(--ryan-bg); color: #1a7bbf; }
+.badge-gray { background: var(--bg); color: var(--muted); }
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+.form-input, .form-select {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', sans-serif;
+  background: white;
+  transition: border-color .2s;
+}
+.form-input:focus, .form-select:focus { outline: none; border-color: var(--admin); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:480px){ .two-col{ grid-template-columns:1fr; } }
+
+.preset-list { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+.preset-item {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg); border-radius: var(--radius-sm);
+  padding: 8px 11px; border: 1.5px solid var(--border);
+}
+.preset-item-name { flex: 1; font-size: 13px; font-weight: 500; }
+.preset-item-pen { font-size: 11px; color: var(--red); font-weight: 700; }
+.preset-item-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 0 3px; }
+.preset-item-del:hover { color: var(--red); }
+
+.log-list { display: flex; flex-direction: column; gap: 5px; }
+.log-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 11px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); background: var(--bg);
+}
+.log-desc { flex: 1; font-size: 12px; }
+.log-min { font-size: 13px; font-weight: 700; }
+.log-min.pos { color: var(--green); }
+.log-min.neg { color: var(--red); }
+
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+  z-index: 500; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: white; border-radius: 20px; padding: 24px;
+  width: 92%; max-width: 420px;
+  box-shadow: var(--shadow-lg);
+  animation: mIn .2s ease;
+}
+.modal-wide { max-width: 540px; max-height: 88vh; overflow-y: auto; }
+@keyframes mIn { from{opacity:0;transform:scale(.92) translateY(8px)} to{opacity:1;transform:none} }
+.modal-title { font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 900; margin-bottom: 16px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+
+.toast-container { position: fixed; bottom: 20px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+.toast {
+  background: var(--text); color: white;
+  padding: 9px 14px; border-radius: 9px;
+  font-size: 13px; font-weight: 600;
+  box-shadow: var(--shadow); max-width: 240px;
+  animation: tIn .25s ease;
+}
+.toast.green { background: var(--green); }
+.toast.red { background: var(--red); }
+@keyframes tIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+.eligibility-badge {
+  font-size: 12px; font-weight: 700;
+  padding: 2px 9px; border-radius: 20px;
+  margin-left: 6px;
+}
+.eligibility-badge.ok { background: var(--green-bg); color: #1a7a5a; }
+.eligibility-badge.no { background: var(--red-bg); color: #c0392b; }
+
+.empty { text-align: center; padding: 28px 16px; color: var(--muted); font-size: 13px; }
+.empty .icon { font-size: 32px; margin-bottom: 6px; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: #c5b8f8; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">🌟 平板時間管理</div>
+  <div class="header-right">
+    <div class="header-date" id="headerDate"></div>
+    <button class="admin-btn" onclick="openAdminLogin()">⚙️ 管理</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('today',this)">📅 今日</button>
+  <button class="tab" onclick="switchTab('week',this)">📊 本週</button>
+  <button class="tab" onclick="switchTab('history',this)">📋 歷史</button>
+</div>
+
+<div class="main">
+
+  <!-- TODAY -->
+  <div class="section active" id="sec-today">
+    <div class="week-header">
+      <div class="week-nav">
+        <button class="nav-btn" onclick="changeDay(-1)">◀</button>
+        <div class="week-label" id="todayLabel"></div>
+        <button class="nav-btn" onclick="changeDay(1)">▶</button>
+      </div>
+    </div>
+    <div id="dayTypeBadge"></div>
+    <div id="freya-today-card"></div>
+    <div id="ryan-today-card"></div>
+  </div>
+
+  <!-- WEEK -->
+  <div class="section" id="sec-week">
+    <div class="week-header">
+      <div class="week-nav">
+        <button class="nav-btn" onclick="changeWeek(-1)">◀</button>
+        <div class="week-label" id="weekLabel"></div>
+        <button class="nav-btn" onclick="changeWeek(1)">▶</button>
+      </div>
+    </div>
+    <div class="players-grid">
+      <div class="player-card freya">
+        <div class="player-header">
+          <div class="player-avatar">💕</div>
+          <div><div class="player-name">Freya</div><div style="font-size:11px;color:var(--muted)">本週統計</div></div>
+        </div>
+        <div class="player-stats" id="freya-week-stats"></div>
+      </div>
+      <div class="player-card ryan">
+        <div class="player-header">
+          <div class="player-avatar">🚀</div>
+          <div><div class="player-name" style="color:#1a7bbf">Ryan</div><div style="font-size:11px;color:var(--muted)">本週統計</div></div>
+        </div>
+        <div class="player-stats" id="ryan-week-stats"></div>
+      </div>
+    </div>
+    <div class="card" style="overflow-x:auto;">
+      <div class="card-title">📊 本週詳細</div>
+      <table class="week-table">
+        <thead>
+          <tr>
+            <th>日期</th><th>星期</th>
+            <th>💕 可用</th><th>💕 已玩</th>
+            <th>🚀 可用</th><th>🚀 已玩</th>
+          </tr>
+        </thead>
+        <tbody id="weekTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="section" id="sec-history">
+    <div class="card">
+      <div class="card-title">📋 歷史紀錄</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <select class="form-select" id="historyFilter" onchange="renderHistory()">
+          <option value="all">全部成員</option>
+          <option value="Freya">Freya</option>
+          <option value="Ryan">Ryan</option>
+        </select>
+        <select class="form-select" id="historyType" onchange="renderHistory()">
+          <option value="all">全部類型</option>
+          <option value="task">任務紀錄</option>
+          <option value="play">玩平板</option>
+          <option value="adjust">手動調整</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 匯出CSV</button>
+      </div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADMIN LOGIN -->
+<div class="modal-overlay" id="adminLoginModal">
+  <div class="modal">
+    <div class="modal-title">🔒 管理員登入</div>
+    <div class="form-group">
+      <label class="form-label">密碼</label>
+      <input type="password" class="form-input" id="adminPwInput" placeholder="請輸入管理密碼"
+        onkeyup="if(event.key==='Enter')checkAdminPw()">
+    </div>
+    <div id="pwHint" style="font-size:12px;color:var(--muted);margin-top:6px;">預設密碼：1234</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('adminLoginModal')">取消</button>
+      <button class="btn btn-admin" onclick="checkAdminPw()">登入</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN MAIN -->
+<div class="modal-overlay" id="adminMainModal">
+  <div class="modal modal-wide">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="modal-title" style="margin:0">⚙️ 管理設定</div>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('adminMainModal')">✕</button>
+    </div>
+
+    <!-- Password -->
+    <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">🔑 更改密碼</div>
+    <div style="display:flex;gap:8px;margin-bottom:4px;">
+      <input type="password" class="form-input" id="newPwInput" placeholder="新密碼" style="flex:1">
+      <button class="btn btn-admin btn-sm" onclick="changePw()">更改</button>
+    </div>
+    <div class="divider"></div>
+
+    <!-- Task Presets -->
+    <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;">📋 任務清單管理</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">扣0分鐘 = 未完成直接取消當天平板資格</div>
+    <div style="display:grid;grid-template-columns:1fr 90px auto;gap:6px;margin-bottom:6px;">
+      <input type="text" class="form-input" id="newTaskName" placeholder="任務名稱（例：拿碗洗碗）">
+      <input type="number" class="form-input" id="newTaskPenalty" placeholder="扣幾分" min="0" max="60">
+      <button class="btn btn-admin btn-sm" onclick="addTaskPreset()">＋ 新增</button>
+    </div>
+    <div class="preset-list" id="taskPresetList"></div>
+    <div class="divider"></div>
+
+    <!-- Manual Adjust -->
+    <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;">✏️ 手動加扣時間（今日）</div>
+    <div class="two-col" style="margin-bottom:8px;">
+      <div class="form-group">
+        <label class="form-label">對象</label>
+        <select class="form-select" id="adjChild"><option value="Freya">💕 Freya</option><option value="Ryan">🚀 Ryan</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">類型</label>
+        <select class="form-select" id="adjType"><option value="add">＋ 加分鐘</option><option value="sub">－ 扣分鐘</option></select>
+      </div>
+    </div>
+    <div class="two-col" style="margin-bottom:8px;">
+      <div class="form-group">
+        <label class="form-label">分鐘數</label>
+        <input type="number" class="form-input" id="adjMin" min="1" max="120" value="3" placeholder="分鐘">
+      </div>
+      <div class="form-group">
+        <label class="form-label">說明</label>
+        <input type="text" class="form-input" id="adjDesc" placeholder="例：小考95分">
+      </div>
+    </div>
+    <button class="btn btn-admin btn-full" onclick="applyAdj()">套用調整</button>
+    <div class="divider"></div>
+    <button class="btn btn-danger btn-full" onclick="confirmReset()">🗑️ 清空所有資料</button>
+  </div>
+</div>
+
+<div class="toast-container" id="toastCont"></div>
+
+<script>
+// ===== CONFIG & DATA =====
+const DAYS = ['日','一','二','三','四','五','六'];
+// 0=Sun,1=Mon,...,6=Sat
+// Task days: Mon(1), Wed(3), Fri(5)
+// Play days: Tue(2), Thu(4), Sat(6)
+
+function getData() {
+  try { return JSON.parse(localStorage.getItem('ktd') || '{}'); } catch { return {}; }
+}
+function setData(d) { localStorage.setItem('ktd', JSON.stringify(d)); }
+function getCfg() {
+  const def = {
+    password: '1234',
+    tasks: [
+      { id: 'T1', name: '把碗拿出來洗', penalty: 5 },
+      { id: 'T2', name: '準時寫評量', penalty: 0 },
+      { id: 'T3', name: '準時上床睡覺', penalty: 5 },
+    ]
+  };
+  try {
+    const c = JSON.parse(localStorage.getItem('ktc') || 'null');
+    return c || def;
+  } catch { return def; }
+}
+function setCfg(c) { localStorage.setItem('ktc', JSON.stringify(c)); }
+
+// ===== STATE =====
+let viewDate = new Date();
+let weekOffset = 0;
+
+// ===== UTILS =====
+function dk(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getDOW(d) { return d.getDay(); }
+function isTaskDay(dow) { return [1,3,5].includes(dow); }
+function isPlayDay(dow) { return [2,4,6].includes(dow); }
+function isSunday(dow) { return dow === 0; }
+function baseQuota(dow) {
+  if (dow === 6) return 60; // Sat 30+30
+  if ([2,4].includes(dow)) return 30;
+  return 0;
+}
+
+// prev task day for a given play day
+function prevTaskDate(playDateObj) {
+  // Tue(2)->Mon(1), Thu(4)->Wed(3), Sat(6)->Fri(5)
+  const d = new Date(playDateObj);
+  d.setDate(playDateObj.getDate() - 1);
+  return d;
+}
+
+function computeQuota(dateObj, child) {
+  const dow = getDOW(dateObj);
+  if (!isPlayDay(dow)) return { base:0, adj:0, total:0, eligible:false, cancelReason:'' };
+
+  let base = baseQuota(dow);
+  let penaltyMin = 0;
+  let cancelAll = false;
+  let cancelReason = '';
+
+  const prevD = prevTaskDate(dateObj);
+  const prevKey = dk(prevD);
+  const data = getData();
+  const cfg = getCfg();
+  const prevRec = ((data[prevKey] || {})[child] || {});
+  const prevTasks = prevRec.tasks || {};
+
+  cfg.tasks.forEach(t => {
+    const s = prevTasks[t.id];
+    if (s === 'failed') {
+      if (t.penalty === 0) {
+        cancelAll = true;
+        cancelReason = `「${t.name}」未完成`;
+      } else {
+        penaltyMin += t.penalty;
+      }
+    }
+  });
+
+  // Manual adj from prev task day
+  let adj = 0;
+  (prevRec.manualAdj || []).forEach(m => { adj += m.delta; });
+
+  // Manual adj from today (play day)
+  const todayRec = ((data[dk(dateObj)] || {})[child] || {});
+  (todayRec.manualAdj || []).forEach(m => { adj += m.delta; });
+
+  if (cancelAll) {
+    return { base:0, adj, total:0, eligible:false, cancelReason };
+  }
+
+  const effective = Math.max(0, base - penaltyMin + adj);
+  return { base, adj, penaltyMin, total: effective, eligible: effective > 0, cancelReason };
+}
+
+// ===== RENDER TODAY =====
+function renderToday() {
+  const dow = getDOW(viewDate);
+  const key = dk(viewDate);
+  const data = getData();
+
+  // label
+  document.getElementById('todayLabel').textContent =
+    `${viewDate.getFullYear()}年 ${viewDate.getMonth()+1}月${viewDate.getDate()}日（週${DAYS[dow]}）`;
+
+  // day badge
+  let badge = '';
+  if (isTaskDay(dow)) badge = `<div class="day-badge task-day">📝 任務日 — 完成任務才有明天的平板時間</div>`;
+  else if (dow === 6) badge = `<div class="day-badge sat">☀️ 星期六 — 上下午各30分，共60分鐘</div>`;
+  else if (isPlayDay(dow)) badge = `<div class="day-badge play-day">🎮 平板日 — 基本配額 30 分鐘</div>`;
+  else badge = `<div class="day-badge free">😴 星期日 — 休息日</div>`;
+  document.getElementById('dayTypeBadge').innerHTML = badge;
+
+  ['Freya','Ryan'].forEach(child => {
+    const cid = child.toLowerCase();
+    const rec = ((data[key] || {})[child] || {});
+    const tasks = rec.tasks || {};
+    const manualAdj = rec.manualAdj || [];
+    const color = child === 'Freya' ? 'var(--freya)' : 'var(--ryan)';
+    const icon = child === 'Freya' ? '💕' : '🚀';
+    const cfg = getCfg();
+    let html = '';
+
+    if (isTaskDay(dow)) {
+      // Task checklist
+      let taskHtml = '<div class="task-list">';
+      cfg.tasks.forEach(t => {
+        const s = tasks[t.id];
+        const isDone = s === 'done';
+        const isFailed = s === 'failed';
+        const rowCls = isDone ? 'done' : isFailed ? 'failed' : '';
+        const penLabel = t.penalty === 0 ? '取消資格' : `扣${t.penalty}分`;
+        taskHtml += `
+          <div class="task-row ${rowCls}">
+            <div class="task-check ${isDone?'done':''}" onclick="toggleTask('${child}','${t.id}','done')" title="完成">✓</div>
+            <div class="task-check ${isFailed?'failed':''}" onclick="toggleTask('${child}','${t.id}','failed')" title="未完成">✗</div>
+            <div class="task-name">${t.name}</div>
+            <div class="task-penalty">未完成：${penLabel}</div>
+          </div>`;
+      });
+      taskHtml += '</div>';
+
+      html = `<div class="card">
+        <div class="card-title">${icon} ${child}</div>
+        ${taskHtml}
+        ${renderManualLog(manualAdj, child)}
+      </div>`;
+
+    } else if (isPlayDay(dow)) {
+      const q = computeQuota(viewDate, child);
+      const played = rec.playedMin || 0;
+      const remaining = Math.max(0, q.total - played);
+
+      let eligBadge = q.eligible
+        ? `<span class="eligibility-badge ok">✅ 可玩 ${q.total} 分</span>`
+        : `<span class="eligibility-badge no">❌ ${q.cancelReason || '取消資格'}</span>`;
+
+      let quotaHtml = `
+        <div class="quota-row">
+          <div class="quota-label">📊 基本配額</div>
+          <div class="quota-val" style="color:${color}">${q.base} 分</div>
+        </div>`;
+
+      if ((q.penaltyMin || 0) > 0) {
+        quotaHtml += `<div class="quota-row">
+          <div class="quota-label">⚠️ 任務扣除</div>
+          <div class="quota-val" style="color:var(--red)">－${q.penaltyMin} 分</div>
+        </div>`;
+      }
+      if (q.adj !== 0) {
+        quotaHtml += `<div class="quota-row">
+          <div class="quota-label">✏️ 手動調整</div>
+          <div class="quota-val" style="color:${q.adj>0?'var(--green)':'var(--red)'}">${q.adj>0?'+':''}${q.adj} 分</div>
+        </div>`;
+      }
+      quotaHtml += `<div class="quota-row" style="border:2px solid ${color}30;background:${child==='Freya'?'var(--freya-bg)':'var(--ryan-bg)'};">
+        <div class="quota-label" style="font-weight:700;font-size:14px;">🎮 今日可用</div>
+        <div class="quota-val" style="color:${color};font-size:24px;">${q.eligible ? q.total : 0} 分鐘</div>
+      </div>`;
+
+      let playHtml = '';
+      if (q.eligible) {
+        playHtml = `
+          <div class="quota-row" style="margin-top:6px;">
+            <div class="quota-label">⏱️ 已玩 / 剩餘</div>
+            <div class="quota-val" style="color:var(--muted)">${played} / ${remaining} 分</div>
+          </div>
+          <div class="play-row">
+            <label>記錄玩了幾分鐘：</label>
+            <input type="number" class="time-input" id="play-${cid}" min="0" max="${q.total}" value="${played}">
+            <button class="btn btn-green btn-sm" onclick="savePlay('${child}')">💾 儲存</button>
+          </div>`;
+      }
+
+      html = `<div class="card">
+        <div class="card-title">${icon} ${child} ${eligBadge}</div>
+        ${quotaHtml}
+        ${playHtml}
+        ${renderManualLog(manualAdj, child)}
+      </div>`;
+
+    } else {
+      html = `<div class="card">
+        <div class="card-title">${icon} ${child}</div>
+        <div class="empty"><div class="icon">😴</div>今天是休息日，好好充電吧！</div>
+      </div>`;
+    }
+
+    document.getElementById(`${cid}-today-card`).innerHTML = html;
+  });
+}
+
+function renderManualLog(manualAdj, child) {
+  if (!manualAdj.length) return '';
+  return `<div class="divider"></div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;">✏️ 手動調整</div>
+    <div class="log-list">
+      ${manualAdj.map((m, i) => `
+        <div class="log-item">
+          <div class="log-desc">${m.desc || '手動調整'}</div>
+          <div class="log-min ${m.delta>0?'pos':'neg'}">${m.delta>0?'+':''}${m.delta} 分</div>
+          <button onclick="deleteAdj('${child}',${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:0 3px;flex-shrink:0;" title="刪除" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">🗑</button>
+        </div>`).join('')}
+    </div>`;
+}
+
+function toggleTask(child, taskId, status) {
+  const key = dk(viewDate);
+  const data = getData();
+  if (!data[key]) data[key] = {};
+  if (!data[key][child]) data[key][child] = {};
+  if (!data[key][child].tasks) data[key][child].tasks = {};
+  const cur = data[key][child].tasks[taskId];
+  if (cur === status) delete data[key][child].tasks[taskId];
+  else data[key][child].tasks[taskId] = status;
+  setData(data);
+  addLog(child, key, 'task', `${taskId} ${status}`, 0, 0);
+  renderToday();
+  toast(status==='done'?'✅ 完成！':'❌ 標記未完成', status==='done'?'green':'red');
+}
+
+function savePlay(child) {
+  const cid = child.toLowerCase();
+  const val = parseInt(document.getElementById(`play-${cid}`).value) || 0;
+  const key = dk(viewDate);
+  const data = getData();
+  if (!data[key]) data[key] = {};
+  if (!data[key][child]) data[key][child] = {};
+  data[key][child].playedMin = val;
+  setData(data);
+  addLog(child, key, 'play', `玩平板 ${val} 分鐘`, val, 0);
+  renderToday();
+  toast(`🎮 ${child} 玩了 ${val} 分鐘，已記錄！`, 'green');
+}
+
+// ===== WEEK =====
+function getWeekDates(offset=0) {
+  const now = new Date();
+  const dow = now.getDay();
+  const mon = new Date(now);
+  mon.setDate(now.getDate() - (dow===0?6:dow-1) + offset*7);
+  return Array.from({length:7}, (_,i) => { const d=new Date(mon); d.setDate(mon.getDate()+i); return d; });
+}
+
+function renderWeek() {
+  const days = getWeekDates(weekOffset);
+  document.getElementById('weekLabel').textContent =
+    `${days[0].getMonth()+1}/${days[0].getDate()} – ${days[6].getMonth()+1}/${days[6].getDate()}`;
+
+  const data = getData();
+  const cfg = getCfg();
+
+  ['Freya','Ryan'].forEach(child => {
+    let tBase=0, tPlayed=0, tDone=0, tFailed=0;
+    days.forEach(d => {
+      const dow = getDOW(d);
+      const rec = ((data[dk(d)]||{})[child]||{});
+      if (isPlayDay(dow)) {
+        const q = computeQuota(d, child);
+        tBase += q.total;
+        tPlayed += rec.playedMin||0;
+      }
+      if (isTaskDay(dow)) {
+        const tasks = rec.tasks||{};
+        cfg.tasks.forEach(t=>{
+          const s=tasks[t.id];
+          if(s==='done') tDone++;
+          if(s==='failed') tFailed++;
+        });
+      }
+    });
+    const cid = child.toLowerCase();
+    document.getElementById(`${cid}-week-stats`).innerHTML = `
+      <div class="stat-box"><div class="stat-num green">${tBase}</div><div class="stat-label">可用分鐘</div></div>
+      <div class="stat-box"><div class="stat-num blue">${tPlayed}</div><div class="stat-label">已玩分鐘</div></div>
+      <div class="stat-box"><div class="stat-num green">${tDone}</div><div class="stat-label">完成任務</div></div>
+      <div class="stat-box"><div class="stat-num red">${tFailed}</div><div class="stat-label">未完成</div></div>`;
+  });
+
+  // Table
+  const DTYPE = {task:'📝任務',play:'🎮平板',sat:'☀️週六',free:'😴休息'};
+  document.getElementById('weekTableBody').innerHTML = days.map(d => {
+    const dow = getDOW(d);
+    const type = isTaskDay(dow)?'task':dow===6?'sat':isPlayDay(dow)?'play':'free';
+
+    const cells = ['Freya','Ryan'].map(child => {
+      const rec = ((data[dk(d)]||{})[child]||{});
+      if (type==='play'||type==='sat') {
+        const q = computeQuota(d,child);
+        const played = rec.playedMin||0;
+        const qd = q.eligible ? `<span class="badge badge-green">${q.total}分</span>` : `<span class="badge badge-red">取消</span>`;
+        const pd = played>0 ? `<span class="badge badge-blue">${played}分</span>` : `<span class="badge badge-gray">—</span>`;
+        return `<td>${qd}</td><td>${pd}</td>`;
+      } else if (type==='task') {
+        const tasks = rec.tasks||{};
+        const cfg = getCfg();
+        const s = cfg.tasks.map(t=>tasks[t.id]==='done'?'✅':tasks[t.id]==='failed'?'❌':'⬜').join(' ');
+        return `<td colspan="2">${s}</td>`;
+      } else {
+        return `<td colspan="2"><span class="badge badge-gray">—</span></td>`;
+      }
+    }).join('');
+
+    const isToday = dk(d) === dk(new Date());
+    return `<tr ${isToday?'style="background:#f3f0ff;"':''}>
+      <td>${d.getMonth()+1}/${d.getDate()}</td>
+      <td>週${DAYS[dow]}<br><span style="font-size:10px;color:var(--muted)">${DTYPE[type]}</span></td>
+      ${cells}
+    </tr>`;
+  }).join('');
+}
+
+// ===== HISTORY =====
+function addLog(child, key, type, desc, val, delta) {
+  const data = getData();
+  if (!data._log) data._log = [];
+  data._log.unshift({ child, dk:key, type, desc, val, delta, ts: Date.now() });
+  if (data._log.length > 600) data._log.length = 600;
+  setData(data);
+}
+
+function renderHistory() {
+  const data = getData();
+  const log = data._log || [];
+  const cf = document.getElementById('historyFilter').value;
+  const tf = document.getElementById('historyType').value;
+  const el = document.getElementById('historyList');
+
+  const f = log.filter(h => (cf==='all'||h.child===cf) && (tf==='all'||h.type===tf));
+  if (!f.length) { el.innerHTML='<div class="empty"><div class="icon">📭</div>尚無紀錄</div>'; return; }
+
+  el.innerHTML = '<div class="log-list">' + f.slice(0,120).map(h => {
+    const color = h.child==='Freya'?'var(--freya)':'var(--ryan)';
+    const icon = h.type==='task'?'📝':h.type==='play'?'🎮':'✏️';
+    const d = h.delta!==0 ? `<div class="log-min ${h.delta>0?'pos':'neg'}">${h.delta>0?'+':''}${h.delta}分</div>` : '';
+    return `<div class="log-item">
+      <div style="width:4px;height:32px;background:${color};border-radius:2px;flex-shrink:0"></div>
+      <div class="log-desc"><b style="color:${color}">${h.child}</b> ${icon} ${h.desc}<br>
+        <span style="font-size:10px;color:var(--muted)">${h.dk}</span></div>
+      ${d}
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function exportCSV() {
+  const data = getData();
+  const log = data._log || [];
+  let csv = 'Date,Child,Type,Description,Delta\n';
+  log.forEach(h => { csv += `${h.dk},${h.child},${h.type},"${h.desc}",${h.delta}\n`; });
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob),download:'kids-tablet.csv'});
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('📥 CSV 匯出成功','green');
+}
+
+// ===== ADMIN =====
+function openAdminLogin() {
+  document.getElementById('adminPwInput').value = '';
+  document.getElementById('pwHint').textContent = '預設密碼：1234';
+  openModal('adminLoginModal');
+  setTimeout(()=>document.getElementById('adminPwInput').focus(), 100);
+}
+function checkAdminPw() {
+  const val = document.getElementById('adminPwInput').value;
+  if (val === getCfg().password) {
+    closeModal('adminLoginModal');
+    renderTaskPresetList();
+    openModal('adminMainModal');
+  } else {
+    document.getElementById('pwHint').textContent = '❌ 密碼錯誤，請重試';
+    document.getElementById('adminPwInput').value='';
+    document.getElementById('adminPwInput').focus();
+  }
+}
+function changePw() {
+  const val = document.getElementById('newPwInput').value.trim();
+  if (!val) { toast('請輸入新密碼','red'); return; }
+  const cfg = getCfg(); cfg.password = val; setCfg(cfg);
+  document.getElementById('newPwInput').value='';
+  toast('🔑 密碼已更改','green');
+}
+function renderTaskPresetList() {
+  const cfg = getCfg();
+  const el = document.getElementById('taskPresetList');
+  if (!cfg.tasks.length) { el.innerHTML='<div class="empty" style="padding:10px">尚無任務</div>'; return; }
+  el.innerHTML = cfg.tasks.map(t => `
+    <div class="preset-item">
+      <div class="preset-item-name">${t.name}</div>
+      <div class="preset-item-pen">${t.penalty===0?'❌取消資格':`扣${t.penalty}分`}</div>
+      <button class="preset-item-del" onclick="delTask('${t.id}')">🗑</button>
+    </div>`).join('');
+}
+function addTaskPreset() {
+  const name = document.getElementById('newTaskName').value.trim();
+  const p = parseInt(document.getElementById('newTaskPenalty').value);
+  if (!name) { toast('請輸入任務名稱','red'); return; }
+  const cfg = getCfg();
+  cfg.tasks.push({ id: 'T'+Date.now(), name, penalty: isNaN(p)?5:p });
+  setCfg(cfg); renderTaskPresetList(); renderToday();
+  document.getElementById('newTaskName').value='';
+  document.getElementById('newTaskPenalty').value='';
+  toast('✅ 任務已新增','green');
+}
+function delTask(id) {
+  const cfg = getCfg(); cfg.tasks = cfg.tasks.filter(t=>t.id!==id); setCfg(cfg);
+  renderTaskPresetList(); renderToday();
+  toast('🗑️ 已刪除','');
+}
+function applyAdj() {
+  const child = document.getElementById('adjChild').value;
+  const type = document.getElementById('adjType').value;
+  const min = parseInt(document.getElementById('adjMin').value)||0;
+  const desc = document.getElementById('adjDesc').value.trim() || '手動調整';
+  if (min<=0) { toast('請輸入分鐘數','red'); return; }
+  const delta = type==='add'?min:-min;
+  const key = dk(viewDate);
+  const data = getData();
+  if (!data[key]) data[key]={};
+  if (!data[key][child]) data[key][child]={};
+  if (!data[key][child].manualAdj) data[key][child].manualAdj=[];
+  data[key][child].manualAdj.push({delta,desc,ts:Date.now()});
+  setData(data);
+  addLog(child, key, 'adjust', desc, min, delta);
+  renderToday(); renderWeek();
+  toast(`✏️ ${child} ${delta>0?'加':'扣'} ${min} 分（${desc}）`, delta>0?'green':'red');
+}
+function deleteAdj(child, index) {
+  const key = dk(viewDate);
+  const data = getData();
+  if (!data[key]?.[child]?.manualAdj) return;
+  data[key][child].manualAdj.splice(index, 1);
+  setData(data);
+  renderToday(); renderWeek();
+  toast('🗑️ 已刪除調整紀錄', '');
+}
+
+function confirmReset() {
+  if (confirm('⚠️ 確定要清空所有紀錄資料嗎？\n（設定與任務清單會保留）')) {
+    localStorage.removeItem('ktd');
+    renderToday(); renderWeek(); renderHistory();
+    closeModal('adminMainModal');
+    toast('🗑️ 紀錄已清空','red');
+  }
+}
+
+// ===== NAV =====
+function changeDay(d) {
+  viewDate = new Date(viewDate);
+  viewDate.setDate(viewDate.getDate()+d);
+  renderToday();
+}
+function changeWeek(d) { weekOffset+=d; renderWeek(); }
+
+// ===== TABS =====
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('sec-'+name).classList.add('active');
+  if(name==='week') renderWeek();
+  if(name==='history') renderHistory();
+}
+
+// ===== MODAL =====
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click', e => { if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open'); });
+
+// ===== TOAST =====
+function toast(msg, type='') {
+  const el = document.createElement('div');
+  el.className = 'toast '+type; el.textContent = msg;
+  document.getElementById('toastCont').appendChild(el);
+  setTimeout(()=>el.remove(), 2600);
+}
+
+// ===== INIT =====
+(function init() {
+  const now = new Date();
+  document.getElementById('headerDate').textContent =
+    `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} 週${DAYS[now.getDay()]}`;
+  renderToday();
+})();
+</script>
+</body>
+</html>
